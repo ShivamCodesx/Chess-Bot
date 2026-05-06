@@ -10,9 +10,13 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 class SimpleHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
+        self.send_header('Content-Type', 'text/html')
         self.end_headers()
-        self.wfile.write(b"Bot is running 24/7!")
-
+        # This opens your index.html and sends it to the browser
+        with open('index.html', 'rb') as file:
+            self.wfile.write(file.read())
+            
+            
 def run_dummy_server():
     port = int(os.environ.get("PORT", 8080))
     server_address = ('0.0.0.0', port)
