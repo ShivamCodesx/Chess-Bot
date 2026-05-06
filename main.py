@@ -22,7 +22,8 @@ def run_dummy_server():
 
 # --- BOT CONFIGURATION ---
 # Replace 'YOUR_NEW_TOKEN_HERE' with your freshly generated Lichess token.
-TOKEN = "lip_xsv8WjZMBnrX5PPKSgdI"
+TOKEN = os.environ.get("LICHESS_TOKEN", "your_backup_token_here")
+
 
 session = berserk.TokenSession(TOKEN)
 client = berserk.Client(session=session)
