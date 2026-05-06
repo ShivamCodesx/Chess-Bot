@@ -5,16 +5,19 @@ import requests
 import os
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-# --- DUMMY SERVER FOR RAILWAY ---
-# This keeps Railway from killing the app by pretending to be a website.
+
 class SimpleHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header('Content-Type', 'text/html')
-        self.end_headers()
-        # This opens your index.html and sends it to the browser
-        with open('index.html', 'rb') as file:
-            self.wfile.write(file.read())
+        def do_GET(self):
+        try:
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html')
+            self.end_headers()
+            # This looks for the index.html file in your folder
+            with open('index.html', 'rb') as file:
+                self.wfile.write(file.read())
+        except FileNotFoundError:
+            self.send_error(404, "index.html not found in your folder!")
+            
             
             
 def run_dummy_server():
@@ -24,8 +27,7 @@ def run_dummy_server():
     print(f"Dummy server listening on port {port}")
     httpd.serve_forever()
 
-# --- BOT CONFIGURATION ---
-# Replace 'YOUR_NEW_TOKEN_HERE' with your freshly generated Lichess token.
+
 TOKEN = os.environ.get("LICHESS_TOKEN", "your_backup_token_here")
 
 
