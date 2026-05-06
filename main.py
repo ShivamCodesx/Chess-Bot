@@ -3,11 +3,11 @@ import chess
 import threading
 import requests
 import os
+import json
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-
 class SimpleHandler(BaseHTTPRequestHandler):
-        def do_GET(self):
+    def do_GET(self):
         try:
             self.send_response(200)
             self.send_header('Content-Type', 'text/html')
@@ -16,17 +16,24 @@ class SimpleHandler(BaseHTTPRequestHandler):
             with open('index.html', 'rb') as file:
                 self.wfile.write(file.read())
         except FileNotFoundError:
-            self.send_error(404, "index.html not found in your folder!")
-            
-            
-            
+            self.send_response(404)
+            self.end_headers()
+            self.wfile.write(b"index.html not found in your folder!")
+        except Exception as e:
+            self.send_response(500)
+            self.end_headers()
+            self.wfile.write(f"Server Error: {e}".encode())
+
 def run_dummy_server():
+    # Railway assigns a port, or we use 8080 as a backup
     port = int(os.environ.get("PORT", 8080))
     server_address = ('0.0.0.0', port)
     httpd = HTTPServer(server_address, SimpleHandler)
     print(f"Dummy server listening on port {port}")
     httpd.serve_forever()
 
+# --- THE REST OF YOUR BOT CODE BELOW ---
+# (Keep your TOKEN, upgrade_account, play_game, and start functions here)
 
 TOKEN = os.environ.get("LICHESS_TOKEN", "your_backup_token_here")
 
