@@ -1,19 +1,75 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess</title>
+    <title>Chess Activity</title>
+    <script src="https://unpkg.com/@discord/embedded-app-sdk@1.0.0/dist/index.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    
     <style>
-        body { background: #161512; color: white; font-family: sans-serif; text-align: center; margin: 0; }
-        .container { width: 100vw; height: 80vh; border: none; }
-        iframe { width: 100%; height: 100%; border: none; }
+        body { background: #2c2f33; color: white; display: flex; flex-direction: column; align-items: center; font-family: sans-serif; }
+        #myBoard { width: 400px; margin-top: 20px; }
+        .status { margin: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <iframe src="https://lichess.org/tv/frame?user=YourBotName&theme=brown&bg=dark"></iframe>
-    </div>
-</body>
-</html>
+    <h2>Chess Activity</h2>
+    <div id="myBoard"></div>
+    <div class="status">Status: White to move</div>
 
+    <script>
+        // 1. Initialize Discord Activity
+        const discordSdk = new window.discordSdk.DiscordSDK("YOUR_CLIENT_ID_HERE");
+        setupDiscord();
+
+        async function setupDiscord() {
+            await discordSdk.ready();
+            console.log("Discord SDK is ready");
+        }
+
+        // 2. Chess Logic
+        var board = null
+        var game = new Chess()
+        var $status = $('.status')
+
+        function onDragStart (source, piece, position, orientation) {
+            if (game.game_over()) return false
+            if (piece.search(/^b/) !== -1) return false
+        }
+
+        function makeRandomMove () {
+            var possibleMoves = game.moves()
+            if (possibleMoves.length === 0) return
+            var randomIdx = Math.floor(Math.random() * possibleMoves.length)
+            game.move(possibleMoves[randomIdx])
+            board.position(game.fen())
+            updateStatus()
+        }
+
+        function onDrop (source, target) {
+            var move = game.move({ from: source, to: target, promotion: 'q' })
+            if (move === null) return 'snapback'
+            window.setTimeout(makeRandomMove, 250)
+            updateStatus()
+        }
+
+        function onSnapEnd () { board.position(game.fen()) }
+
+        function updateStatus () {
+            var status = ''
+            var moveColor = (game.turn() === 'b') ? 'Black' : 'White'
+            if (game.in_checkmate()) { status = 'Game over, ' + moveColor + ' is in checkmate.' }
+            else if (game.in_draw()) { status = 'Game over, drawn position' }
+            else { status = moveColor + ' to move' }
+            $status.html(status)
+        }
+
+        var config = { draggable: true, position: 'start', onDragStart: onDragStart, onDrop: onDrop, onSnapEnd: onSnapEnd }
+        board = Chessboard('myBoard', config)
+        updateStatus()
+    </script>
+</body>
+        </html>
+        
