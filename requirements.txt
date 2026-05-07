@@ -1,4 +1,3 @@
-berserk
+discord.py
 python-chess
-requests
 
